@@ -51,10 +51,17 @@ jobs:
 
       - name: API image build and push to docker-hub
         run: |
-          docker build -t ${{secrets.DOCKER_USERNAME}}/time-app-api-fbes1237ru ./api
+          docker build -t ${{secrets.DOCKER_USERNAME}}/time-app-api ./api
           docker push ${{secrets.DOCKER_USERNAME}}/time-app-api-fbes1237ru
         
       - name: Frontend image build and push to docker-hub
         run: |
-          docker build -t ${{secrets.DOCKER_USERNAME}}/time-app-front-fbes1237ru ./frontend
+          docker build -t ${{secrets.DOCKER_USERNAME}}/time-app-front ./frontend
           docker push ${{secrets.DOCKER_USERNAME}}/time-app-front-fbes1237ru
+
+
+
+
+
+
+
