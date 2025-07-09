@@ -4,13 +4,17 @@ on:
   push:
     branches: ["main"]
 
+env:
+  REGISTRY: gchr.io
+  IMAGE_NAME: ${{github.repository}}
+
 jobs:
   test:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: ['20.19.3']
+        node-version: ["20.19.3"]
     steps:
       - name: Cloning repository
         uses: actions/checkout@v4
@@ -19,29 +23,27 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{matrix.node-version}}
-      
+
       - name: API Dependency install
         working-directory: ./api
         run: npm install
 
-        
       - name: Front Dependency install
         working-directory: ./frontend
         run: npm install
-        
+
       - name: Run unit test
         working-directory: ./api
         run: npm test
 
-
   build-and-deploy:
     needs: test
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: ['20.19.3']
-    
+        node-version: ["20.19.3"]
+
     steps:
       - name: Cloning repository
         uses: actions/checkout@v4
@@ -53,15 +55,36 @@ jobs:
         run: |
           docker build -t ${{secrets.DOCKER_USERNAME}}/time-app-api ./api
           docker push ${{secrets.DOCKER_USERNAME}}/time-app-api
-        
+
       - name: Frontend image build and push to docker-hub
         run: |
           docker build -t ${{secrets.DOCKER_USERNAME}}/time-app-front ./frontend
           docker push ${{secrets.DOCKER_USERNAME}}/time-app-front
 
+  deploy:
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cloning repository
+        uses: actions/checkout@v4
 
+      - name: Azure Debian VM Deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{secrets.AZURE_VM_HOST}}
+          username: ${{secrets.AZURE_VM_USERNAME}}
+          key: ${{secrets.AZURE_VM_SSH_KEY}}
+          port: 22
 
+          script: |
+            if [ ! -d "/app/zamanov-time-app/.git" ]; then
+              git clone https://github.com/${{ github.repository }} /app/IA
+            fi
 
+            cd /app/IA
+            git pull origin main
 
-
-
+            docker compose pull
+            docker compose down
+            docker compose up -d
+            docker image prune -f
