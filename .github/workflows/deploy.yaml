@@ -77,7 +77,7 @@ jobs:
           port: 22
 
           script: |
-            if [ ! -d "/app/zamanov-time-app/.git" ]; then
+            if [ ! -d "/app/IA/.git" ]; then
               git clone https://github.com/${{ github.repository }} /app/IA
             fi
 
