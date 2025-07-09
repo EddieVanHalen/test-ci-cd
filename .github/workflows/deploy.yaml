@@ -65,7 +65,7 @@ jobs:
           docker push ${{secrets.DOCKER_USERNAME}}/time-app-front
 
   deploy:
-    if: github.event_name == 'workflow_dispath' 
+    if: github.event_name == 'workflow_dispatch' 
     runs-on: ubuntu-latest
     steps:
       - name: Cloning repository
