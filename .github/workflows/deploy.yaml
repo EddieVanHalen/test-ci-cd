@@ -3,7 +3,7 @@ name: CI/CD for time-app project
 on:
   push:
     branches: ["main"]
-  workflow-dispath:
+  workflow_dispath:
 
 env:
   REGISTRY: gchr.io
