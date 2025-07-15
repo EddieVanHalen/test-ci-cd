@@ -2,10 +2,10 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
 WORKDIR /src
 
-COPY ./Backend.sln ./
-COPY ./Backend.Api/*.csproj Backend.Api/
-COPY ./Backend.Domain/*.csproj Backend.Domain/
-COPY ./Backend.DataAccess/*.csproj Backend.DataAccess/
+COPY Backend/Backend.sln ./
+COPY Backend/Backend.Api/*.csproj Backend.Api/
+COPY Backend/Backend.Domain/*.csproj Backend.Domain/
+COPY Backend/Backend.DataAccess/*.csproj Backend.DataAccess/
 
 RUN dotnet restore
 
