@@ -11,7 +11,7 @@ RUN dotnet restore
 
 COPY . .
 
-WORKDIR /src/Backend.Api
+WORKDIR /src/Backend/Backend.Api
 
 RUN dotnet publish Backend.Api.csproj -c Release -o /app/out
 
