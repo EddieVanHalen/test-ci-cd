@@ -55,7 +55,7 @@ jobs:
 
       - name: Build and push Backend (dotnet)
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/dotnet-backend
+          docker build -t ${{ secrets.docker_username }}/dotnet-backend -f ./Backend
           docker push ${{ secrets.DOCKER_USERNAME }}/dotnet-backend
 
       - name: Build and push Frontend (React)
