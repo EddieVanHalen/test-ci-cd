@@ -11,58 +11,61 @@ env:
 
 jobs:
   test:
-    if: github.event_name == 'push' 
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         node-version: ["20.19.3"]
+
     steps:
       - name: Cloning repository
         uses: actions/checkout@v4
 
-      - name: Install Node.js ${{matrix.node-version}}
+      - name: Install Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: ${{matrix.node-version}}
+          node-version: ${{ matrix.node-version }}
 
-      - name: API Dependency install
-        working-directory: ./api
+      - name: Frontend dependency install
+        working-directory: ./test
         run: npm install
 
-      - name: Front Dependency install
-        working-directory: ./frontend
-        run: npm install
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
 
-      - name: Run unit test
-        working-directory: ./api
-        run: npm test
+      - name: Restore .NET dependencies
+        working-directory: ./Backend/Backend.Api
+        run: dotnet restore
+
+      - name: Run .NET unit tests
+        working-directory: ./Backend/Backend.Api
+        run: dotnet test
+
 
   build-and-deploy:
-    if: github.event_name == 'push' 
+    if: github.event_name == 'push'
     needs: test
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: ["20.19.3"]
 
     steps:
       - name: Cloning repository
         uses: actions/checkout@v4
 
       - name: Docker login
-        run: echo "${{secrets.DOCKER_PASSWORD}}" | docker login -u "${{secrets.DOCKER_USERNAME}}" --password-stdin
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: API image build and push to docker-hub
+      - name: Build and push Backend (dotnet)
         run: |
-          docker build -t ${{secrets.DOCKER_USERNAME}}/time-app-api ./api
-          docker push ${{secrets.DOCKER_USERNAME}}/time-app-api
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/dotnet-backend -f Backend/Dockerfile .
+          docker push ${{ secrets.DOCKER_USERNAME }}/dotnet-backend
 
-      - name: Frontend image build and push to docker-hub
+      - name: Build and push Frontend (React)
         run: |
-          docker build -t ${{secrets.DOCKER_USERNAME}}/time-app-front ./frontend
-          docker push ${{secrets.DOCKER_USERNAME}}/time-app-front
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/react-frontend ./test
+          docker push ${{ secrets.DOCKER_USERNAME }}/react-frontend
 
   deploy:
     if: github.event_name == 'workflow_dispatch' 

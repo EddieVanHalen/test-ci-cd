@@ -1,31 +1,50 @@
-version: '3.8'
-
 services:
-  frontend:
-    image: moguda/time-app-front-fbes1237ru
-    restart: always
+  dotnetapp:
+    build:
+      context: ./Backend/
+      dockerfile: ./Dockerfile
     ports:
-      - '3005:3000'
-  api:
-    image: moguda/time-app-api-fbes1237ru
-    restart: always
-    ports:
-      - '5005:5000'
-    depends_on:
-      - mysql
-  mysql:
-    image: mysql
-    restart: always
+      - '80:8080'
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: time_db
-    volumes:
-      - mysql_data:/var/lib/mysql
-  adminer:
-    image: adminer
-    restart: always
+      - ASPNETCORE_ENVIRONMENT=Development
+
+
+  front:
+    build:
+      context: ./test/
+      dockerfile: ./Dockerfile
     ports:
-      - '8085:8080'
+      - '3000:3000'
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: LogDB
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: elestio/pgadmin:latest
+    restart: always
+    container_name: pgadmin_dock
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: secret{temproary}
+      PGADMIN_LISTEN_PORT: 8080
+    depends_on:
+      - postgres
+    ports:
+      - "0.0.0.0:8080:8080"
+    volumes:
+      - pgAdmin_data:/pgAdmin4/servers.json
+
 
 volumes:
-    mysql_data:
+  postgres_data:
+  pgAdmin_data:
